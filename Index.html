@@ -100,6 +100,26 @@
     }
 </script>
 </body>
+    <script>
+  // كود تشغيل الزرار الأحمر (ساعة الصفر)
+  function sendLink() {
+    const link = document.getElementById('linkInput').value;
+    if (link) {
+      socket.emit('sendTargetLink', link); // بيبعت اللينك للسيرفر
+      alert('تم إرسال نداء الأبطال! ساعة الصفر بدأت.');
+    } else {
+      alert('حطي اللينك الأول يا بطلة!');
+    }
+  }
+
+  // استقبال التنبيه عند الجميع
+  socket.on('zeroHourAlert', (data) => {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.style.display = 'block'; // بيظهر الصندوق الأحمر عند كل الناس
+    console.log('الهدف الجديد:', data.target);
+  });
+</script>
+
 </html>
 
 
