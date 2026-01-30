@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean The Net</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; color: #333; }
+        
+        /* الرأس الأزرق */
+        header { background: #0d6efd; color: white; padding: 20px; font-size: 28px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* عداد المتصلين */
+        .stats { background: #fff; padding: 15px; font-size: 20px; border-bottom: 4px solid #0d6efd; margin-bottom: 20px; font-weight: bold; color: #0d6efd; }
+        
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        
+        /* حقل الإدخال */
+        input { padding: 15px; width: 100%; box-sizing: border-box; border: 2px solid #0d6efd; border-radius: 8px; margin-bottom: 15px; font-size: 16px; outline: none; }
+        input:focus { border-color: #004085; }
+        
+        /* الزر الأحمر الحماسي */
+        button.main-btn { width: 100%; padding: 15px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 0 #a71d2a; }
+        button.main-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* صندوق التنبيه (ساعة الصفر) */
+        #alertBox { display: none; background: #fff3cd; padding: 25px; margin-top: 30px; border-radius: 12px; border: 3px solid #dc3545; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
+        .hidden-btn { display: inline-block; text-decoration: none; background: #000; color: #fff; padding: 15px 30px; border-radius: 5px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<header>Clean The Net 🛡️</header>
+
+<div class="stats">
+    الأبطال المتصلون الآن: <span id="userCount">0</span> 👤
+</div>
+
+<div class="container">
+    <p>ضع رابط الفيديو أو القناة المسيئة هنا للإبلاغ الجماعي:</p>
+    <input type="text" id="linkInput" placeholder="https://...">
+    <br>
+    <button class="main-btn" onclick="sendLink()">إطلاق نفير الإبلاغ (ساعة الصفر) 🚨</button>
+
+    <div id="alertBox">
+        <h2 style="color: #dc3545; margin-top: 0;">⚠️ نداء عاجل!</h2>
+        <p style="font-size: 18px;">تم رصد هدف جديد. اضغط أدناه للانتقال والإبلاغ فوراً:</p>
+        
+        <a id="targetBtn" href="#" target="_blank" class="hidden-btn">
+            انتقل للهدف 🚀
+        </a>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+    const userCountDisplay = document.getElementById('userCount');
+    const alertBox = document.getElementById('alertBox');
+    const targetBtn = document.getElementById('targetBtn');
+
+    // 1. تحديث العداد
+    socket.on('updateUserCount', (count) => {
+        userCountDisplay.innerText = count;
+    });
+
+    // 2. استقبال أمر ساعة الصفر
+    socket.on('zeroHourAlert', (data) => {
+        alertBox.style.display = 'block';
+        targetBtn.href = data.target; 
+        
+        // تشغيل صوت تنبيه (اختياري) واهتزاز للهاتف
+        if(navigator.vibrate) navigator.vibrate([500, 200, 500]);
+        alert("🚨 تنبيه: بدأت حملة إبلاغ جديدة الآن!");
+    });
+
+    // 3. إرسال الرابط
+    function sendLink() {
+        const link = document.getElementById('linkInput').value;
+        if(link) {
+            socket.emit('sendTargetLink', link);
+            document.getElementById('linkInput').value = '';
+            alert("تم الإرسال للأبطال! انتظر التفاعل...");
+        } else {
+            alert("يرجى وضع رابط أولاً");
+        }
+    }
+</script>
+</body>
+</html>
