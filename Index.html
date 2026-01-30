@@ -6,7 +6,7 @@
     <title>Clean The Net</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; color: #333; transition: background-color 0.5s; }
         header { background: #0d6efd; color: white; padding: 20px; font-size: 28px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .stats { background: #fff; padding: 15px; font-size: 20px; border-bottom: 4px solid #0d6efd; margin-bottom: 20px; font-weight: bold; color: #0d6efd; }
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
@@ -34,41 +34,4 @@
 
     <div id="alertBox">
         <h2 style="color: #dc3545; margin-top: 0;">⚠️ نداء عاجل!</h2>
-        <p style="font-size: 18px;">تم رصد هدف جديد. اضغط أدناه للانتقال والإبلاغ فوراً:</p>
-        <a id="targetBtn" href="#" target="_blank" class="hidden-btn">انتقل للهدف 🚀</a>
-    </div>
-</div>
-
-<script>
-    // الربط المباشر بسيرفر ريندر
-    const socket = io("https://clean-the-net-.onrender.com");
-    const userCountDisplay = document.getElementById('userCount');
-
-    // تحديث العداد لحظياً
-    socket.on('updateUserCount', (count) => {
-        userCountDisplay.innerText = count;
-    });
-
-    // إرسال الرابط للسيرفر
-    function sendLink() {
-        const inputField = document.getElementById('linkInput');
-        const link = inputField.value;
-        if(link) {
-            socket.emit('sendTargetLink', link); 
-            inputField.value = '';
-            alert("تم إرسال نداء الأبطال! ساعة الصفر بدأت."); 
-        } else {
-            alert("حط اللينك الأول يا بطل!"); 
-        }
-    }
-
-    // استقبال التنبيه عند الكل
-    socket.on('zeroHourAlert', (data) => {
-        document.getElementById('alertBox').style.display = 'block';
-        document.getElementById('targetBtn').href = data.target;
-        if(navigator.vibrate) navigator.vibrate([500, 200, 500]);
-        alert("🚨 تنبيه: بدأت حملة إبلاغ جديدة الآن!");
-    });
-</script>
-</body>
-</html>
+        <p style="font-size: 18px;">تم رصد هدف جديد. اضغط أدناه للانتقال والإبلاغ فوراً:</p
