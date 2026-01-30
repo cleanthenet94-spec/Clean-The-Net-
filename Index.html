@@ -3,35 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean The Net</title>
+    <title>Clean The Net | غرفة العمليات</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; color: #333; transition: background-color 0.5s; }
-        header { background: #0d6efd; color: white; padding: 20px; font-size: 28px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .stats { background: #fff; padding: 15px; font-size: 20px; border-bottom: 4px solid #0d6efd; margin-bottom: 20px; font-weight: bold; color: #0d6efd; }
-        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
-        input { padding: 15px; width: 100%; box-sizing: border-box; border: 2px solid #0d6efd; border-radius: 8px; margin-bottom: 15px; font-size: 16px; outline: none; }
-        button.main-btn { width: 100%; padding: 15px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 0 #a71d2a; }
-        button.main-btn:active { transform: translateY(4px); box-shadow: none; }
-        #alertBox { display: none; background: #fff3cd; padding: 25px; margin-top: 30px; border-radius: 12px; border: 3px solid #dc3545; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-        .hidden-btn { display: inline-block; text-decoration: none; background: #000; color: #fff; padding: 15px 30px; border-radius: 5px; font-weight: bold; margin-top: 15px; }
+        :root { --primary: #0d6efd; --danger: #dc3545; --success: #198754; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; transition: background 0.3s; overflow-x: hidden; }
+        header { background: var(--primary); color: white; padding: 25px; font-size: 30px; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .stats { background: white; padding: 20px; font-size: 22px; font-weight: bold; color: var(--primary); border-bottom: 5px solid var(--primary); margin-bottom: 30px; }
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        input { padding: 18px; width: 100%; box-sizing: border-box; border: 3px solid #ddd; border-radius: 12px; margin-bottom: 20px; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(13,110,253,0.2); }
+        .main-btn { width: 100%; padding: 18px; background: var(--danger); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 20px; transition: 0.3s; box-shadow: 0 5px 0 #a71d2a; }
+        .main-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* صندوق النداء العاجل */
+        #alertBox { display: none; background: #fff3cd; padding: 30px; margin-top: 30px; border-radius: 20px; border: 4px dashed var(--danger); animation: flash 1s infinite; }
+        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .target-link { display: inline-block; text-decoration: none; background: #000; color: #fff; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; font-size: 18px; }
     </style>
 </head>
 <body>
 
-<header>Clean The Net 🛡️</header>
+<header>🛡️ CLEAN THE NET</header>
 
 <div class="stats">
-    الأبطال المتصلون الآن: <span id="userCount">0</span> 👤
+    🚀 عدد الأبطال المستعدين: <span id="userCount">0</span>
 </div>
 
 <div class="container">
-    <p>ضع رابط الفيديو أو القناة المسيئة هنا للإبلاغ الجماعي:</p>
-    <input type="text" id="linkInput" placeholder="https://...">
-    <br>
-    <button class="main-btn" onclick="sendLink()">إطلاق نفير الإبلاغ (ساعة الصفر) 🚨</button>
+    <input type="text" id="linkInput" placeholder="ضع رابط الهدف هنا...">
+    <button class="main-btn" onclick="sendLink()">إطلاق نداء ساعة الصفر 🚨</button>
 
     <div id="alertBox">
-        <h2 style="color: #dc3545; margin-top: 0;">⚠️ نداء عاجل!</h2>
-        <p style="font-size: 18px;">تم رصد هدف جديد. اضغط أدناه للانتقال والإبلاغ فوراً:</p
+        <h2 style="color: var(--danger); margin: 0;">⚠️ نداء عاجل لكل الأبطال!</h2>
+        <p style="font-size: 18px; font-weight: bold;">تم تحديد هدف جديد، انطلقوا للإبلاغ:</p>
+        <a id="targetBtn" href="#" target="_blank" class="target-link">انتقل للهدف الآن 🚀</a>
+    </div>
+</div>
+
+<script>
+    // الربط المباشر بعنوان السيرفر الخاص بك على Render
+    const socket = io("https://clean-the-net-.onrender.com");
+    const userCountDisplay = document.getElementById('userCount');
+
+    // 1. تحديث العداد (لو بقى 0 يبقى السيرفر نايم)
+    socket.on('updateUserCount', (count) => {
+        userCountDisplay.innerText = count;
+        console.log("المتصلين الآن:", count);
+    });
+
+    // 2. إرسال النداء للسيرفر
+    function sendLink() {
+        const input = document.getElementById('linkInput');
+        const link = input.value.trim();
+        if(link) {
+            socket.emit('sendTargetLink', link); 
+            input.value = ''; // تصفير الخانة تلقائياً
+            alert("تم إرسال الإشارة لجميع الأبطال! 🫡");
+        } else {
+            alert("يا بطل، حط رابط الهدف الأول!");
+        }
+    }
+
+    // 3. استقبال "ساعة الصفر" (تنبيه لحظي للجميع)
+    socket.on('zeroHourAlert', (data) => {
+        const box = document.getElementById('alertBox');
+        const btn = document.getElementById('targetBtn');
+        
+        box.style.display = 'block';
+        btn.href = data.target;
+
+        // المواصفات القتالية: اهتزاز وتغيير لون الشاشة لتنبيه البطل
+        document.body.style.backgroundColor = "#ffcccc";
+        if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
+        
+        // صوت تنبيه (اختياري لو المتصفح سمح)
+        console.log("هجوم جماعي على:", data.target);
+    });
+</script>
+</body>
+</html>
