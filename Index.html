@@ -3,92 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean The Net</title>
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C4EB86D2L8"></script>
+    <title>Clean The Net | واجهة القيادة</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA_ID"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-C4EB86D2L8');
+      gtag('config', 'YOUR_GA_ID');
     </script>
 
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
     <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "247c96e8-5f46-4eed-be01-2185526954f2",
+      window.OneSignal = window.OneSignal || [];
+      OneSignal.push(function() {
+        OneSignal.init({
+          appId: "YOUR_ONESIGNAL_APP_ID",
         });
       });
     </script>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    
     <style>
-        :root { --primary: #0d6efd; --danger: #dc3545; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; transition: background 0.3s; }
-        header { background: var(--primary); color: white; padding: 25px; font-size: 30px; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .stats { background: white; padding: 20px; font-size: 22px; font-weight: bold; color: var(--primary); border-bottom: 5px solid var(--primary); margin-bottom: 30px; }
-        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
-        input { padding: 18px; width: 100%; box-sizing: border-box; border: 3px solid #ddd; border-radius: 12px; margin-bottom: 20px; font-size: 16px; }
-        .main-btn { width: 100%; padding: 18px; background: var(--danger); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 20px; box-shadow: 0 5px 0 #a71d2a; transition: 0.2s; }
-        .main-btn:active { transform: translateY(4px); box-shadow: none; }
-        #alertBox { display: none; background: #fff3cd; padding: 30px; margin-top: 30px; border-radius: 20px; border: 4px dashed var(--danger); animation: flash 1s infinite; }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-        .target-link { display: inline-block; text-decoration: none; background: #000; color: #fff; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; font-size: 18px; }
+        body { font-family: sans-serif; transition: background 0.5s; text-align: center; padding: 50px; }
+        .zero-hour { background-color: #ff4d4d !important; color: white; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        #counter { font-size: 3rem; font-weight: bold; color: #2ecc71; }
     </style>
 </head>
 <body>
 
-<header>🛡️ CLEAN THE NET</header>
+    <h1>غرفة عمليات Clean The Net</h1>
+    <p>عدد الأبطال المتصلين الآن:</p>
+    <div id="counter">0</div>
 
-<div class="stats">
-    🚀 عدد الأبطال المتصلين الآن: <span id="userCount">0</span>
-</div>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io('https://your-app-on-render.com');
 
-<div class="container">
-    <input type="text" id="linkInput" placeholder="ضع رابط الهدف هنا...">
-    <button class="main-btn" onclick="sendLink()">إطلاق نداء ساعة الصفر 🚨</button>
+        // تحديث عداد المتواجدين
+        socket.on('updateCounter', (count) => {
+            document.getElementById('counter').innerText = count;
+        });
 
-    <div id="alertBox">
-        <h2 style="color: var(--danger); margin: 0;">⚠️ نداء عاجل!</h2>
-        <p style="font-size: 18px; font-weight: bold;">لقد حانت الآن ساعة الصفر! تم رصد الهدف، انطلقوا يا أبطال. 🛡️</p>
-        <a id="targetBtn" href="#" target="_blank" class="target-link">انتقل للهدف الآن 🚀</a>
-    </div>
-</div>
+        // استقبال نداء ساعة الصفر
+        socket.on('zeroHour', (data) => {
+            // 1. تغيير المظهر
+            document.body.classList.add('zero-hour');
+            
+            // 2. تفعيل الاهتزاز (Vibration API)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 500]);
+            }
 
-<script>
-    // الربط بسيرفر العداد الحي
-    const socket = io("https://clean-the-net-.onrender.com");
-
-    // تحديث العداد
-    socket.on('updateUserCount', (count) => {
-        document.getElementById('userCount').innerText = count;
-    });
-
-    // وظيفة الإرسال
-    function sendLink() {
-        const input = document.getElementById('linkInput');
-        const link = input.value.trim();
-        if(link) {
-            socket.emit('sendTargetLink', link); 
-            input.value = '';
-            alert("تم إرسال الإشارة لجميع الأبطال! 🫡");
-        } else {
-            alert("حط الرابط الأول يا بطل!");
-        }
-    }
-
-    // استقبال التنبيه
-    socket.on('zeroHourAlert', (data) => {
-        const box = document.getElementById('alertBox');
-        const btn = document.getElementById('targetBtn');
-        box.style.display = 'block';
-        btn.href = data.target;
-        document.body.style.backgroundColor = "#ffcccc";
-        if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
-    });
-</script>
+            // 3. تنبيه صوتي بسيط (اختياري)
+            console.log("استنفار: " + data.url);
+            alert("ساعة الصفر! الرابط المستهدف: " + data.url);
+        });
+    </script>
 </body>
 </html>
