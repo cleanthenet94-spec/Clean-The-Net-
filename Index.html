@@ -4,19 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clean The Net | غرفة العمليات</title>
+    
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "247c96e8-5f46-4eed-be01-2185526954f2",
+        });
+      });
+    </script>
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
     <style>
-        :root { --primary: #0d6efd; --danger: #dc3545; --success: #198754; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; transition: background 0.3s; overflow-x: hidden; }
+        :root { --primary: #0d6efd; --danger: #dc3545; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; text-align: center; margin: 0; transition: background 0.3s; }
         header { background: var(--primary); color: white; padding: 25px; font-size: 30px; font-weight: 800; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .stats { background: white; padding: 20px; font-size: 22px; font-weight: bold; color: var(--primary); border-bottom: 5px solid var(--primary); margin-bottom: 30px; }
         .container { padding: 20px; max-width: 500px; margin: 0 auto; }
         input { padding: 18px; width: 100%; box-sizing: border-box; border: 3px solid #ddd; border-radius: 12px; margin-bottom: 20px; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(13,110,253,0.2); }
+        input:focus { border-color: var(--primary); outline: none; }
         .main-btn { width: 100%; padding: 18px; background: var(--danger); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 20px; transition: 0.3s; box-shadow: 0 5px 0 #a71d2a; }
         .main-btn:active { transform: translateY(4px); box-shadow: none; }
-        
-        /* صندوق النداء العاجل */
         #alertBox { display: none; background: #fff3cd; padding: 30px; margin-top: 30px; border-radius: 20px; border: 4px dashed var(--danger); animation: flash 1s infinite; }
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         .target-link { display: inline-block; text-decoration: none; background: #000; color: #fff; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; font-size: 18px; }
@@ -35,37 +45,35 @@
     <button class="main-btn" onclick="sendLink()">إطلاق نداء ساعة الصفر 🚨</button>
 
     <div id="alertBox">
-        <h2 style="color: var(--danger); margin: 0;">⚠️ نداء عاجل لكل الأبطال!</h2>
-        <p style="font-size: 18px; font-weight: bold;">تم تحديد هدف جديد، انطلقوا للإبلاغ:</p>
+        <h2 style="color: var(--danger); margin: 0;">⚠️ نداء عاجل!</h2>
+        <p style="font-size: 18px; font-weight: bold;">لقد حانت الآن ساعة الصفر! تم رصد الهدف، انطلقوا يا أبطال. 🛡️</p>
         <a id="targetBtn" href="#" target="_blank" class="target-link">انتقل للهدف الآن 🚀</a>
     </div>
 </div>
 
 <script>
-    // الربط المباشر بعنوان السيرفر الخاص بك على Render
+    // الربط بالسيرفر
     const socket = io("https://clean-the-net-.onrender.com");
-    const userCountDisplay = document.getElementById('userCount');
 
-    // 1. تحديث العداد (لو بقى 0 يبقى السيرفر نايم)
+    // تحديث عداد المتصلين
     socket.on('updateUserCount', (count) => {
-        userCountDisplay.innerText = count;
-        console.log("المتصلين الآن:", count);
+        document.getElementById('userCount').innerText = count;
     });
 
-    // 2. إرسال النداء للسيرفر
+    // إرسال الرابط لجميع الأبطال
     function sendLink() {
         const input = document.getElementById('linkInput');
         const link = input.value.trim();
         if(link) {
             socket.emit('sendTargetLink', link); 
-            input.value = ''; // تصفير الخانة تلقائياً
+            input.value = ''; // تصفير الخانة بعد الإرسال
             alert("تم إرسال الإشارة لجميع الأبطال! 🫡");
         } else {
             alert("يا بطل، حط رابط الهدف الأول!");
         }
     }
 
-    // 3. استقبال "ساعة الصفر" (تنبيه لحظي للجميع)
+    // استقبال التنبيه عند الأبطال
     socket.on('zeroHourAlert', (data) => {
         const box = document.getElementById('alertBox');
         const btn = document.getElementById('targetBtn');
@@ -73,13 +81,11 @@
         box.style.display = 'block';
         btn.href = data.target;
 
-        // المواصفات القتالية: اهتزاز وتغيير لون الشاشة لتنبيه البطل
+        // تنبيهات الموبايل (اهتزاز وتغيير لون)
         document.body.style.backgroundColor = "#ffcccc";
         if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
-        
-        // صوت تنبيه (اختياري لو المتصفح سمح)
-        console.log("هجوم جماعي على:", data.target);
     });
 </script>
 </body>
 </html>
+
