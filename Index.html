@@ -5,12 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clean The Net</title>
     
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C4EB86D2L8"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-C4EB86D2L8');
+    </script>
+
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
-          appId: "247c96e8-5f46-4eed-be01-2185526954f2", // الـ App ID الخاص بك
+          appId: "247c96e8-5f46-4eed-be01-2185526954f2",
         });
       });
     </script>
@@ -36,7 +44,7 @@
 <header>🛡️ CLEAN THE NET</header>
 
 <div class="stats">
-    🚀 عدد الأبطال المستعدين: <span id="userCount">0</span>
+    🚀 عدد الأبطال المتصلين الآن: <span id="userCount">0</span>
 </div>
 
 <div class="container">
@@ -51,38 +59,33 @@
 </div>
 
 <script>
-    // الاتصال بسيرفر Render
+    // الربط بسيرفر العداد الحي
     const socket = io("https://clean-the-net-.onrender.com");
 
-    // استقبال تحديث العداد
+    // تحديث العداد
     socket.on('updateUserCount', (count) => {
         document.getElementById('userCount').innerText = count;
     });
 
-    // وظيفة الإرسال للعداد والستارة
+    // وظيفة الإرسال
     function sendLink() {
         const input = document.getElementById('linkInput');
         const link = input.value.trim();
-        
         if(link) {
-            // إرسال الإشارة للسيرفر
             socket.emit('sendTargetLink', link); 
             input.value = '';
-            alert("تم إرسال الإشارة بنجاح! 🫡");
+            alert("تم إرسال الإشارة لجميع الأبطال! 🫡");
         } else {
-            alert("يا بطل، حط رابط الهدف الأول!");
+            alert("حط الرابط الأول يا بطل!");
         }
     }
 
-    // استقبال النداء عند الأبطال
+    // استقبال التنبيه
     socket.on('zeroHourAlert', (data) => {
         const box = document.getElementById('alertBox');
         const btn = document.getElementById('targetBtn');
-        
         box.style.display = 'block';
         btn.href = data.target;
-
-        // تنبيهات بصرية وحركية
         document.body.style.backgroundColor = "#ffcccc";
         if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
     });
